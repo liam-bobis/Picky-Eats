@@ -14,7 +14,7 @@
 
 .logo,
 .logo-top {
-  width: 40px;        /* controls size */
+  width: 200px;        /* controls size */
   height: auto;       /* keeps proportions */
   max-width: 100%;    /* prevents overflow */
   object-fit: contain;
