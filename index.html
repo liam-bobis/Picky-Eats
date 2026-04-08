@@ -50,7 +50,7 @@
       <option value="date">Date Food</option>
       <option value="quick">Quick Meal</option>
       <option value="hangout">Hangout Food</option>
-      <option value="Celebration">Celebration Food</option>
+      <option value="celebration">Celebration Food</option>
     </select>
 
     <label><strong>Your Course</strong></label>
@@ -165,8 +165,11 @@
       setTimeout(() => {
         const random = filtered[Math.floor(Math.random() * filtered.length)];
 
-        document.getElementById("result").innerText =
-          "🍜 You should eat: " + random.name + " • " + getPesoSigns(random.priceType);
+        document.getElementById("result").innerHTML =
+        "🍜 You should eat:<br><strong>" +
+        random.name +
+        "</strong> (" +
+        getPesoSigns(random.priceType) + ")";
 
         if (random.image) {
           const img = document.getElementById("foodImg");
