@@ -6,7 +6,7 @@
   <title>pickmeal</title>
 
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5799856197009282"
      crossorigin="anonymous"></script>
 </head>
@@ -17,28 +17,28 @@
       <img src="Pickmeal-transparent-logo.png" alt="Logo" class="logo-top">
     </div>
 
-    <p>Let us decide your next meal</p>
+    <p class="subtitle">Let us decide your next meal</p>
 
     <div class="instructions">
       Adding more filters can improve your results. Leave filters on “Any” if you want wider suggestions.
     </div>
 
-    <label><strong>Your Price Type</strong></label>
+    <label><strong>Your Price Range</strong></label>
     <div class="price-inputs">
       <select id="minPriceType">
-        <option value="">Any minimum</option>
-        <option value="1">₱</option>
-        <option value="2">₱₱</option>
-        <option value="3">₱₱₱</option>
-        <option value="4">₱₱₱₱</option>
+        <option value="">Any maximum</option>
+        <option value="1">₱ (Budget)</option>
+        <option value="2">₱₱ (Affordable)</option>
+        <option value="3">₱₱₱ (Mid-range)</option>
+        <option value="4">₱₱₱₱ (Premium)</option>
       </select>
 
       <select id="maxPriceType">
         <option value="">Any maximum</option>
-        <option value="1">₱</option>
-        <option value="2">₱₱</option>
-        <option value="3">₱₱₱</option>
-        <option value="4">₱₱₱₱</option>
+        <option value="1">₱ (Budget)</option>
+        <option value="2">₱₱ (Affordable)</option>
+        <option value="3">₱₱₱ (Mid-range)</option>
+        <option value="4">₱₱₱₱ (Premium)</option>
       </select>
     </div>
 
@@ -63,19 +63,20 @@
 
     <button onclick="pickFood()">Pick My Food</button>
 
-    <div id="result" class="loading">Loading food database...</div>
+    <div id="result" class="result-card loading">Loading food database...</div>
     <img id="foodImg" alt="Food image">
 
-    <div class="toggle" onclick="toggleDarkMode()">Toggle Dark Mode 🌙</div>
+    <div class="mode-switch" onclick="toggleDarkMode()" id="modeToggle">Dark Mode 🌙</div>
+
     <ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-XXXXXXXX"
-     data-ad-slot="1234567890"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXX"
+      data-ad-slot="1234567890"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
 
     <script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
+      (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
   </div>
 
@@ -91,13 +92,15 @@
 
         foods = data.map(item => ({
           name: item.Name,
-          priceType: item.PriceType,   // keep as text because it can be "1,2"
+          priceType: item.PriceType,
           mood: item.Mood,
           course: item.Course,
           image: item.Image
         }));
 
-        document.getElementById("result").innerText = "Click the button to decide!";
+        const resultBox = document.getElementById("result");
+        resultBox.classList.remove("loading");
+        resultBox.innerText = "Click the button to decide!";
       })
       .catch(err => {
         console.error("Error loading sheet:", err);
@@ -106,7 +109,7 @@
 
     function pickFood() {
       if (foods.length === 0) {
-        document.getElementById("result").innerText = "Still loading food database...";
+        showResultMessage("Still loading food database...");
         return;
       }
 
@@ -119,7 +122,7 @@
       const maxPriceType = maxPriceTypeValue === "" ? null : Number(maxPriceTypeValue);
 
       if (minPriceType !== null && maxPriceType !== null && minPriceType > maxPriceType) {
-        document.getElementById("result").innerText = "Minimum price type cannot be higher than maximum.";
+        showResultMessage("Minimum price range cannot be higher than maximum.");
         document.getElementById("foodImg").style.display = "none";
         return;
       }
@@ -154,33 +157,70 @@
       });
 
       if (filtered.length === 0) {
-        document.getElementById("result").innerText = "No match 😢 Try adjusting your filters.";
+        showResultMessage("No match 😢 Try adjusting your filters.");
         document.getElementById("foodImg").style.display = "none";
         return;
       }
 
-      document.getElementById("result").innerText = "Choosing your food... 🍽️";
+      showResultMessage("Choosing your food... 🍽️");
       document.getElementById("foodImg").style.display = "none";
 
       setTimeout(() => {
         const random = filtered[Math.floor(Math.random() * filtered.length)];
 
-        document.getElementById("result").innerHTML =
-        "🍜 You should eat:<br><strong>" +
-        random.name +
-        "</strong> (" +
-        getPesoSigns(random.priceType) + ")";
+        const richMessage = maxPriceType === 4
+          ? '<div class="rich-message">💰 Congratulations, you are rich 😎. SANA ALL PO!</div>'
+          : "";
+
+        const resultHTML = `
+          <div class="result-label">🍜 You should eat:</div>
+          <div class="result-food">${random.name}</div>
+          <div class="result-price">${getPriceLabel(random.priceType)}</div>
+          ${richMessage}
+        `;
+
+        showResultMessage(resultHTML, true);
 
         if (random.image) {
           const img = document.getElementById("foodImg");
           img.src = random.image;
           img.style.display = "block";
+          img.classList.remove("animate-image");
+          void img.offsetWidth;
+          img.classList.add("animate-image");
         }
       }, 1200);
     }
 
-    function getPesoSigns(priceType) {
-      if (!priceType) return "";
+    function showResultMessage(message, isHTML = false) {
+      const resultBox = document.getElementById("result");
+
+      // animation reset
+      resultBox.classList.remove("animate-result");
+      void resultBox.offsetWidth;
+      resultBox.classList.add("animate-result");
+
+      // 👉 ADD THIS (controls size)
+      if (message === "Click the button to decide!" || message.includes("Choosing")) {
+        resultBox.classList.remove("active");
+      } else {
+        resultBox.classList.add("active");
+      }
+
+      if (isHTML) {
+        resultBox.innerHTML = message;
+      } else {
+        resultBox.innerText = message;
+      }
+    }
+
+    function getPriceLabel(priceType) {
+      const labels = {
+        1: "₱ (Budget)",
+        2: "₱₱ (Affordable)",
+        3: "₱₱₱ (Mid-range)",
+        4: "₱₱₱₱ (Premium)"
+      };
 
       const prices = (priceType + "")
         .split(",")
@@ -189,11 +229,18 @@
 
       if (prices.length === 0) return "";
 
-      return prices.map(p => "₱".repeat(p)).join("–");
+      return prices.map(p => labels[p]).join(" - ");
     }
 
     function toggleDarkMode() {
       document.body.classList.toggle("dark");
+
+      const toggleText = document.getElementById("modeToggle");
+      if (document.body.classList.contains("dark")) {
+        toggleText.innerText = "Light Mode ☀️";
+      } else {
+        toggleText.innerText = "Dark Mode 🌙";
+      }
     }
   </script>
 
