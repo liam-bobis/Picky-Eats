@@ -149,7 +149,7 @@ button:hover {
   display: inline-block;
   width: 100%;
   text-align: center;
-  transition: all 0.25s ease; /* smooth expand */
+  transition: all 0.25s ease;
 }
 
 .result-card.active {
@@ -192,6 +192,7 @@ body.dark .result-food {
   font-size: 14px;
   font-weight: 600;
   color: #7a7a7a;
+  line-height: 1.5;
 }
 
 body.dark .result-price {
@@ -199,7 +200,7 @@ body.dark .result-price {
 }
 
 .rich-message {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 13px;
   font-weight: 600;
   color: #ff914d;
@@ -277,6 +278,35 @@ body.dark .ads {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.cuisine-badge {
+  background: #ffe7d6;
+  color: #b85c1e;
+  border: 1px solid #ffc8a3;
+}
+
+body.dark .cuisine-badge {
+  background: #3a2a20;
+  color: #ffd2b3;
+  border-color: #6b4a35;
 }
 
 @media (max-width: 480px) {

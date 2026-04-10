@@ -27,18 +27,18 @@
     <div class="price-inputs">
       <select id="minPriceType">
         <option value="">Any min.</option>
-        <option value="1">₱ (Budget)</option>
-        <option value="2">₱₱ (Affordable)</option>
-        <option value="3">₱₱₱ (Mid-range)</option>
-        <option value="4">₱₱₱₱ (Premium)</option>
+        <option value="1">₱ (Below ₱100)</option>
+        <option value="2">₱₱ (₱101-₱150)</option>
+        <option value="3">₱₱₱ (₱151-₱300)</option>
+        <option value="4">₱₱₱₱ (₱301+)</option>
       </select>
 
       <select id="maxPriceType">
         <option value="">Any max.</option>
-        <option value="1">₱ (Budget)</option>
-        <option value="2">₱₱ (Affordable)</option>
-        <option value="3">₱₱₱ (Mid-range)</option>
-        <option value="4">₱₱₱₱ (Premium)</option>
+        <option value="1">₱ (Below ₱100)</option>
+        <option value="2">₱₱ (₱101-₱150)</option>
+        <option value="3">₱₱₱ (₱151-₱300)</option>
+        <option value="4">₱₱₱₱ (₱301+)</option>
       </select>
     </div>
 
@@ -48,7 +48,8 @@
       <option value="comfort">Comfort Food</option>
       <option value="solo">Solo Food</option>
       <option value="date">Date Food</option>
-      <option value="quick">Quick Meal</option>
+      <option value="fast">Fast Food</option>
+      <option value="street">Street Food</option>
       <option value="hangout">Hangout Food</option>
       <option value="celebration">Celebration Food</option>
     </select>
@@ -60,6 +61,16 @@
       <option value="appetizer">Appetizer</option>
       <option value="snack">Snack</option>
       <option value="dessert">Dessert</option>
+    </select>
+
+    <label><strong>Your Cuisine</strong></label>
+    <select id="cuisine">
+      <option value="any">Any</option>
+      <option value="filipino">Filipino</option>
+      <option value="asian">Asian</option>
+      <option value="latino">Latino</option>
+      <option value="western">Western</option>
+      <option value="fusion">Fusion</option>
     </select>
 
     <button onclick="pickFood()">Pick My Food</button>
@@ -96,6 +107,7 @@
           priceType: item.PriceType,
           mood: item.Mood,
           course: item.Course,
+          cuisine: item.Cuisine,
           image: item.Image
         }));
 
@@ -118,6 +130,7 @@
       const maxPriceTypeValue = document.getElementById("maxPriceType").value;
       const mood = document.getElementById("mood").value;
       const course = document.getElementById("course").value;
+      const cuisine = document.getElementById("cuisine").value;
 
       const minPriceType = minPriceTypeValue === "" ? null : Number(minPriceTypeValue);
       const maxPriceType = maxPriceTypeValue === "" ? null : Number(maxPriceTypeValue);
@@ -142,6 +155,10 @@
           .split(",")
           .map(c => c.trim().toLowerCase());
 
+        const cuisineList = (food.cuisine || "")
+          .split(",")
+          .map(c => c.trim().toLowerCase());
+
         const matchesMinPrice =
           minPriceType === null || priceList.some(p => p >= minPriceType);
 
@@ -154,7 +171,10 @@
         const matchesCourse =
           course === "any" || courseList.includes(course);
 
-        return matchesMinPrice && matchesMaxPrice && matchesMood && matchesCourse;
+        const matchesCuisine =
+          cuisine === "any" || cuisineList.includes(cuisine);
+
+        return matchesMinPrice && matchesMaxPrice && matchesMood && matchesCourse && matchesCuisine;
       });
 
       if (filtered.length === 0) {
@@ -169,14 +189,20 @@
       setTimeout(() => {
         const random = filtered[Math.floor(Math.random() * filtered.length)];
 
-        const richMessage = maxPriceType === 4
-          ? '<div class="rich-message">💰 Congratulations, you are rich 😎. SANA ALL PO!</div>'
-          : "";
+        let richMessage = "";
+        if (maxPriceType === 4) {
+          richMessage = '<div class="rich-message">💰 Congratulations, you are rich 😎. SANA ALL PO!</div>';
+        } else if (maxPriceType === 3) {
+          richMessage = '<div class="rich-message">😏 You’re kinda rich huh?</div>';
+        }
+
+        const cuisineBadgeHTML = getCuisineBadges(random.cuisine);
 
         const resultHTML = `
           <div class="result-label">🍜 You should eat:</div>
           <div class="result-food">${random.name}</div>
           <div class="result-price">${getPriceLabel(random.priceType)}</div>
+          ${cuisineBadgeHTML ? `<div class="result-badges">${cuisineBadgeHTML}</div>` : ""}
           ${richMessage}
         `;
 
@@ -184,7 +210,7 @@
 
         if (random.image) {
           const img = document.getElementById("foodImg");
-          img.src = random.image;
+          img.src = normalizeImageUrl(random.image);
           img.style.display = "block";
           img.classList.remove("animate-image");
           void img.offsetWidth;
@@ -196,12 +222,10 @@
     function showResultMessage(message, isHTML = false) {
       const resultBox = document.getElementById("result");
 
-      // animation reset
       resultBox.classList.remove("animate-result");
       void resultBox.offsetWidth;
       resultBox.classList.add("animate-result");
 
-      // 👉 ADD THIS (controls size)
       if (message === "Click the button to decide!" || message.includes("Choosing")) {
         resultBox.classList.remove("active");
       } else {
@@ -217,20 +241,69 @@
 
     function getPriceLabel(priceType) {
       const labels = {
-        1: "₱ (Budget)",
-        2: "₱₱ (Affordable)",
-        3: "₱₱₱ (Mid-range)",
-        4: "₱₱₱₱ (Premium)"
+        1: "₱ (Below ₱100)",
+        2: "₱₱ (₱101-₱150)",
+        3: "₱₱₱ (₱151-₱300)",
+        4: "₱₱₱₱ (₱301+)"
       };
 
       const prices = (priceType + "")
         .split(",")
         .map(p => Number(p.trim()))
-        .filter(p => !isNaN(p));
+        .filter(p => !isNaN(p))
+        .sort((a, b) => a - b);
 
       if (prices.length === 0) return "";
 
-      return prices.map(p => labels[p]).join(" - ");
+      const min = prices[0];
+      const max = prices[prices.length - 1];
+
+      if (min === max) {
+        return labels[min];
+      }
+
+      return `${labels[min]} - ${labels[max]}`;
+    }
+
+    function getCuisineBadges(cuisine) {
+      if (!cuisine) return "";
+
+      const cuisineList = cuisine
+        .split(",")
+        .map(c => c.trim().toLowerCase())
+        .filter(c => c && c !== "any"); // ❌ remove "any"
+
+      if (cuisineList.length === 0) return "";
+
+      return cuisineList
+        .map(c =>
+          `<span class="badge cuisine-badge">${capitalize(c)}</span>`
+        )
+        .join("");
+    }
+
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+    function normalizeImageUrl(url) {
+      if (!url) return "";
+
+      const driveFileMatch = url.match(/\/file\/d\/([^/]+)/);
+      if (driveFileMatch) {
+        return `https://drive.google.com/thumbnail?id=${driveFileMatch[1]}&sz=w1000`;
+      }
+
+      const driveOpenMatch = url.match(/[?&]id=([^&]+)/);
+      if (driveOpenMatch) {
+        return `https://drive.google.com/thumbnail?id=${driveOpenMatch[1]}&sz=w1000`;
+      }
+
+      return url;
     }
 
     function toggleDarkMode() {
