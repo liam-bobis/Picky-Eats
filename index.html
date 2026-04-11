@@ -3,18 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pickmeal</title>
+  <title>PickMeal – What Should I Eat? (Food Picker Philippines)</title>
+
+  <meta name="description" content="PickMeal helps you decide what to eat based on your budget, mood, cuisine, and course. Perfect for students and food lovers in the Philippines.">
+  <meta name="keywords" content="what should I eat, food picker Philippines, random food generator, what to eat today, Filipino food ideas, meal picker">
+  <meta name="author" content="PickMeal">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="PickMeal – What Should I Eat?">
+  <meta property="og:description" content="Can't decide what to eat? Let PickMeal choose for you based on your mood, budget, and cuisine.">
+  <meta property="og:image" content="https://www.pickmeal.site/preview.png">
+  <meta property="og:url" content="https://www.pickmeal.site">
+  <meta property="og:type" content="website">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PickMeal – What Should I Eat?">
+  <meta name="twitter:description" content="Let PickMeal decide your next meal instantly.">
+  <meta name="twitter:image" content="https://www.pickmeal.site/preview.png">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="favicon.png">
 
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5799856197009282"
-     crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
 <body>
 
   <div class="container">
     <div class="header">
-      <img src="Pickmeal-transparent-logo.png" alt="Logo" class="logo-top">
+      <img src="Pickmeal-transparent-logo.png" alt="PickMeal Logo" class="logo-top">
     </div>
 
     <p class="subtitle">Let us decide your next meal</p>
@@ -78,19 +102,34 @@
     <div id="result" class="result-card loading">Loading food database...</div>
     <img id="foodImg" alt="Food image">
 
+    <!-- Ad space -->
+    <div class="ad-container">
+      <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-5799856197009282"
+        data-ad-slot="1234567890"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+    </div>
+
+    <div class="seo-section">
+      <h2>Find What to Eat Instantly</h2>
+      <p>
+        PickMeal helps you choose meals based on your preferences including price range, cuisine, and mood.
+        Whether you're craving Filipino food or international dishes, this tool makes deciding easy.
+      </p>
+      <p class="seo-text">
+        Use PickMeal to discover random food ideas, Filipino dishes, and international cuisine instantly.
+        Stop overthinking and let the app decide your next meal.
+      </p>
+    </div>
+
     <div class="mode-switch" onclick="toggleDarkMode()" id="modeToggle">Dark Mode 🌙</div>
-
-    <ins class="adsbygoogle"
-      style="display:block"
-      data-ad-client="ca-pub-XXXXXXXX"
-      data-ad-slot="1234567890"
-      data-ad-format="auto"
-      data-full-width-responsive="true"></ins>
-
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
   </div>
+
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
 
   <script>
     let foods = [];
@@ -100,8 +139,6 @@
     fetch(SHEET_URL)
       .then(res => res.json())
       .then(data => {
-        console.log("Loaded data:", data);
-
         foods = data.map(item => ({
           name: item.Name,
           priceType: item.PriceType,
@@ -157,7 +194,8 @@
 
         const cuisineList = (food.cuisine || "")
           .split(",")
-          .map(c => c.trim().toLowerCase());
+          .map(c => c.trim().toLowerCase())
+          .filter(Boolean);
 
         const matchesMinPrice =
           minPriceType === null || priceList.some(p => p >= minPriceType);
@@ -271,24 +309,18 @@
       const cuisineList = cuisine
         .split(",")
         .map(c => c.trim().toLowerCase())
-        .filter(c => c && c !== "any"); // ❌ remove "any"
+        .filter(c => c && c !== "any");
 
       if (cuisineList.length === 0) return "";
 
       return cuisineList
-        .map(c =>
-          `<span class="badge cuisine-badge">${capitalize(c)}</span>`
-        )
+        .map(c => `<span class="badge cuisine-badge">${capitalize(c)}</span>`)
         .join("");
     }
 
-function capitalize(word) {
-  return word.charAt(0).toUpperCase() + word.slice(1);
-}
-
-function capitalize(word) {
-  return word.charAt(0).toUpperCase() + word.slice(1);
-}
+    function capitalize(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
 
     function normalizeImageUrl(url) {
       if (!url) return "";
